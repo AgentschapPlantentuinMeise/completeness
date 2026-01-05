@@ -26,15 +26,16 @@ from shapely.geometry import box
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-
-# ----------------------------
+# ---------------------------
 # Paths (adapt to your setup)
-# ----------------------------
+# ---------------------------
 BASE = Path("/home/qgroom/Documents/Python Scripts/completeness/")
 
-csv_path = BASE / "onekdata" / "0061226-250827131500795.csv"        # occurrence data
+#csv_path = BASE / "onekdata" / "0061226-250827131500795.csv"        # occurrence data
+csv_path = BASE / "fivekdata" / "0069839-251120083545085.csv"        # occurrence data
 boundary_path = BASE / "borders" / "flanders.geojson"               # Flanders polygon
-out_gpkg = BASE / "outputs" / "flanders_completeness_1km_boot.gpkg" # output
+#out_gpkg = BASE / "outputs" / "flanders_completeness_1km_boot.gpkg" # output
+out_gpkg = BASE / "outputs" / "flanders_completeness_5km_boot.gpkg" # output
 out_gpkg.parent.mkdir(parents=True, exist_ok=True)
 
 # Output folder
@@ -50,6 +51,7 @@ min_T = 10          # minimum number of sampling units (dates) per cell to keep
 n_boot = 100         # bootstrap replications per cell (50 = quick; 100 = paper-like)
 seed = 42           # RNG seed
 reliable_threshold = 0.80  # choose 0.8 or 0.9 depending on how strict you want to be
+GRID_KM = 5
 
 # ---------------------------
 # Read occurrence data
@@ -74,7 +76,7 @@ else:
 df = df.dropna(subset=["eeacellcode", species_col, "yearmonthday"]).copy()
 
 # Keep only 1 km cells
-df = df[df["eeacellcode"].str.startswith("1km", na=False)].copy()
+df = df[df["eeacellcode"].str.startswith(f"{GRID_KM}km", na=False)].copy()
 
 
 # ---------------------------
@@ -307,9 +309,11 @@ gdf_clip = gpd.clip(gdf_cells, flanders_3035)
 # ---------------------------
 # Export
 # ---------------------------
-gdf_clip.to_file(out_gpkg, layer="completeness_1km_bootstrap", driver="GPKG")
+gdf_clip.to_file(out_gpkg, layer="completeness_5km_bootstrap", driver="GPKG")
 print("Saved GeoPackage:", out_gpkg)
 
+gdf_clip[["eeacellcode", "C1_lo"]].to_csv("C1_lower_5km.tsv", sep="\t", index=False)
+print("Saved:", "C1_lower_5km.tsv")
 
 # ---------------------------
 # Plot maps

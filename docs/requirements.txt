@@ -1,0 +1,12 @@
+sphinx
+sphinx-rtd-theme
+myst-parser
+sphinx-autodoc-typehints
+
+numpy
+pandas
+geopandas
+matplotlib
+shapely
+pyproj
+fiona
